@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+			 xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:mx="library://ns.adobe.com/flex/halo"
+			 minWidth="33"
+			 minHeight="1"
+			 alpha.disabled=".5">
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("plo.flex.components.slider.MultiDataHSlider")]
+		]]>
+	</fx:Metadata>
+	<fx:Declarations>
+		<fx:Component id="dataTip">
+			<s:DataRenderer minHeight="24"
+							minWidth="40"
+							y="-34">
+				<s:Rect top="0"
+						left="0"
+						right="0"
+						bottom="0">
+					<s:fill>
+						<s:SolidColor color="0x000000"
+									  alpha=".9"/>
+					</s:fill>
+					<s:filters>
+						<s:DropShadowFilter angle="90"
+											color="0x999999"
+											distance="3"/>
+					</s:filters>
+				</s:Rect>
+				<s:Label id="labelDisplay"
+						 text="{new Date(parseInt(data.toString())).toDateString()}"
+						 horizontalCenter="0"
+						 verticalCenter="1"
+						 left="5"
+						 right="5"
+						 top="5"
+						 bottom="5"
+						 textAlign="center"
+						 verticalAlign="middle"
+						 fontWeight="normal"
+						 color="white"
+						 fontSize="11">
+				</s:Label>
+			</s:DataRenderer>
+		</fx:Component>
+		<fx:Component id="interThumb">
+			<s:Button top="0"
+					  bottom="0"
+					  width="11"
+					  height="11"
+					  skinClass="plo.flex.components.slider.skin.InterThumbSkin"
+					  >
+			</s:Button>
+		</fx:Component>
+		<fx:Component id="thumb">
+			<s:Button top="0"
+					  bottom="0"
+					  width="11"
+					  height="11"
+					  skinClass="plo.flex.components.slider.skin.ThumbSkin"
+					  />
+		</fx:Component>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			
+			
+			override protected function initializationComplete():void
+			{
+				super.initializationComplete();
+
+			}
+		]]>
+	</fx:Script>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="disabled"/>
+	</s:states>
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<s:Group id="labelDisplay" width="100%" height="100%">
+		<s:Label text="Start"/>
+		<s:Label text="End" right="0"/>
+	</s:Group>
+	<s:Group width="100%" height="100%">
+		<s:Button id="track"
+				  left="0"
+				  right="0"
+				  top="0"
+				  bottom="0"
+				  minWidth="33"
+				  width="{hostComponent.width}"
+				  skinClass="plo.flex.components.slider.skin.TrackSkin"/>
+		<s:Rect height="12" width="1" verticalCenter="0">
+			<s:fill>
+				<s:SolidColor color="0x04badf" />
+			</s:fill>
+		</s:Rect>
+		<s:Rect height="12" width="1" verticalCenter="0" right="0">
+			<s:fill>
+				<s:SolidColor color="0x04badf" />
+			</s:fill>
+		</s:Rect>
+		<s:Group id="interThumbsDisplay"
+				 left="0"
+				 right="0"
+				 top="0"
+				 bottom="0"
+				 minWidth="33"
+				 width="{hostComponent.width}"/>
+		<s:Group id="thumbsDisplay"
+				 left="0"
+				 right="0"
+				 top="0"
+				 bottom="0"
+				 minWidth="33"
+				 width="{hostComponent.width}"/>
+	</s:Group>
+</s:SparkSkin>

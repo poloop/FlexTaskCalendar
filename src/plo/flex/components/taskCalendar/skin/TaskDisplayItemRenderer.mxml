@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<local:TaskItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/halo"
+				xmlns:local="plo.flex.components.taskCalendar.*"
+				creationComplete="creationCompleteHandler(event)"
+				currentStateChange="currentStateChangeHandler(event)"
+				minWidth="0"
+				minHeight="0" xmlns:mx1="library://ns.adobe.com/flex/mx">
+	<!-- states -->
+	<fx:Metadata>
+		[Event(name="createItem", type="flash.event.Event")]
+		[Event(name="doubleClickItem", type="flash.event.Event")]
+		[Event(name="moveTask", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+		[Event(name="scaleLeft", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+		[Event(name="scaleRight", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+	</fx:Metadata>
+	<fx:Declarations>
+		<s:SolidColor id="normalColor"
+					  color="#000000"/>
+		<s:SolidColor id="hoveredColor"
+					  color="#FF0000"/>
+		<fx:Component id="dataTip">
+			<s:DataRenderer minHeight="24"
+							minWidth="40"
+							y="-34">
+				<s:Rect top="0"
+						left="0"
+						right="0"
+						bottom="0">
+					<s:fill>
+						<s:SolidColor color="0x000000"
+									  alpha=".9"/>
+					</s:fill>
+					<s:filters>
+						<s:DropShadowFilter angle="90"
+											color="0x999999"
+											distance="3"/>
+					</s:filters>
+				</s:Rect>
+				<s:Label id="labelDisplay"
+						 text="{data.label}"
+						 horizontalCenter="0"
+						 verticalCenter="1"
+						 left="5"
+						 right="5"
+						 top="5"
+						 bottom="5"
+						 textAlign="center"
+						 verticalAlign="middle"
+						 fontWeight="normal"
+						 color="white"
+						 fontSize="11">
+				</s:Label>
+			</s:DataRenderer>
+		</fx:Component>
+	</fx:Declarations>
+
+	<local:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+		<s:State name="normalAndShowsCaret"/>
+		<s:State name="hoveredAndShowsCaret"/>
+		<s:State name="selectedAndShowsCaret"/>
+	</local:states>
+	<fx:Script>
+		<![CDATA[
+			import flash.display.DisplayObject;
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.geom.Point;
+			
+			import mx.core.IDataRenderer;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.mx_internal;
+			import mx.events.FlexEvent;
+			import mx.events.SandboxMouseEvent;
+			import mx.events.StateChangeEvent;
+			import mx.graphics.LinearGradient;
+			import mx.managers.PopUpManager;
+			
+			import plo.flex.components.taskCalendar.events.TaskEvent;
+			
+			import spark.components.List;
+
+			use namespace mx_internal;
+
+			[Embed(source="assets/cursors/transforms.png")]
+			public var TransformsCursor:Class;
+
+			[Embed(source="assets/cursors/move.png")]
+			public var MoveCursor:Class;
+
+			private var clickOffset:Point;
+
+			public var isTransforming:Boolean=false;
+			
+			[Bindable]
+			private var maskDisplay : Rect = new Rect();
+
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				maskDisplay.fill = new SolidColor(0xFF0000);
+				maskDisplay.width = width - (owner as List).scroller.verticalScrollBar.measuredWidth;
+				maskDisplay.height = height;
+				addElement(maskDisplay);				
+				dispatchEvent(new Event(CREATECOMPLETE_ITEM, true));
+			}
+			
+			private var popUpInstance : IFlexDisplayObject;
+			
+			protected function doubleClickHandler(event : MouseEvent) : void
+			{
+				dispatchEvent(new Event(DOUBLE_CLICK_ITEM, true));
+			}
+
+			protected function dataDisplay_mouseDownHandler(event:MouseEvent):void
+			{
+				
+				event.stopImmediatePropagation();
+
+				isTransforming=true;
+
+				var leftLimit:Number=Math.max(dataDisplay.width * .1, 2);
+				var rightLimit:Number=Math.min(dataDisplay.width * .9, dataDisplay.width - 2);
+
+				clickOffset=dataDisplay.globalToLocal(new Point(event.stageX, event.stageY));
+				if (clickOffset.x >= leftLimit && clickOffset.x <= rightLimit)
+				{
+					cursorManager.setCursor(MoveCursor, 2, -8, -8);
+					systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_MOVE, system_mouseMoveHandler, true);
+				}
+				else if (clickOffset.x > rightLimit)
+				{
+					cursorManager.setCursor(TransformsCursor, 2, -8, -8);
+					systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_MOVE, system_mouseTransformRightHandler, true);
+				}
+				else if (clickOffset.x < leftLimit)
+				{
+					cursorManager.setCursor(TransformsCursor, 2, -8, -8);
+					systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_MOVE, system_mouseTransformLeftHandler, true);
+				}
+
+				systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, system_mouseUpHandler, true);
+				systemManager.getSandboxRoot().addEventListener(SandboxMouseEvent.MOUSE_UP_SOMEWHERE, system_mouseUpHandler);
+				dispatchEvent(new Event(ITEM_SELECTED, true, true));
+			}
+
+
+			protected function system_mouseMoveHandler(event:MouseEvent):void
+			{
+				//trace(document);
+				var p:Point;
+				p=globalToLocal(new Point(event.stageX - clickOffset.x, event.stageY - clickOffset.y));
+				//dataDisplay.x=p.x;
+				dispatchEvent(new TaskEvent(TaskEvent.MOVE_TASK, false, false, p));
+
+				if (dataTipInstance)
+				{
+					updateDataTip(dataTipInstance, dataTipInitialPosition);
+				}
+			}
+
+			protected function system_mouseTransformLeftHandler(event:MouseEvent):void
+			{
+				var p:Point;
+				p=globalToLocal(new Point(event.stageX - clickOffset.x, event.stageY - clickOffset.y));
+				var w:Number=dataDisplay.x + dataDisplay.width;
+				if (w - p.x >= minWidthItem)
+				{
+					/* dataDisplay.x=p.x;
+					 dataDisplay.width=w - p.x; */
+					dispatchEvent(new TaskEvent(TaskEvent.SCALE_LEFT, false, false, p));
+				}
+				else
+				{
+					dataDisplay.x=w - minWidthItem;
+					dataDisplay.width=minWidthItem;
+				}
+				if (dataTipInstance)
+				{
+					updateDataTip(dataTipInstance, dataTipInitialPosition);
+				}
+			}
+
+			protected function system_mouseTransformRightHandler(event:MouseEvent):void
+			{
+				var p:Point;
+				p=globalToLocal(new Point(event.stageX - clickOffset.x, event.stageY - clickOffset.y));
+				if (p.x - dataDisplay.x + clickOffset.x >= minWidthItem)
+				{
+					/* dataDisplay.width=p.x - dataDisplay.x + clickOffset.x; */
+					dispatchEvent(new TaskEvent(TaskEvent.SCALE_RIGHT, false, false, new Point(p.x + clickOffset.x, p.y + clickOffset.y)));
+				}
+				else
+				{
+					dataDisplay.width=minWidthItem;
+				}
+				if (dataTipInstance)
+				{
+					updateDataTip(dataTipInstance, dataTipInitialPosition);
+				}
+			}
+
+			protected function system_mouseUpHandler(event:Event):void
+			{
+				isTransforming=false;
+				dataDisplay_mouseOutHandler(null);
+				systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_MOVE, system_mouseMoveHandler, true);
+				systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_MOVE, system_mouseTransformRightHandler, true);
+				systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_MOVE, system_mouseTransformLeftHandler, true);
+				systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, system_mouseUpHandler, true);
+				systemManager.getSandboxRoot().removeEventListener(SandboxMouseEvent.MOUSE_UP_SOMEWHERE, system_mouseUpHandler);
+				cursorManager.removeAllCursors();
+			}
+
+			protected function currentStateChangeHandler(event:StateChangeEvent):void
+			{
+				//trace(event.newState);
+			}
+
+			private var dataTipInstance:IDataRenderer;
+			private var dataTipInitialPosition:Point;
+
+			protected function dataDisplay_mouseOverHandler(event:MouseEvent):void
+			{
+				if (dataTip && enabled && !dataTipInstance)
+				{
+
+
+					var factory:IFactory=this["dataTip"];
+
+					dataTipInstance=factory.newInstance();
+
+					dataTipInstance.data=data;
+
+					systemManager.toolTipChildren.addChild(DisplayObject(dataTipInstance));
+
+					dataTipInitialPosition=new Point(DisplayObject(dataTipInstance).x, DisplayObject(dataTipInstance).y);
+
+					updateDataTip(dataTipInstance, dataTipInitialPosition);
+				}
+			}
+
+
+			protected function dataDisplay_mouseOutHandler(event:MouseEvent):void
+			{
+				if (!isTransforming)
+				{
+					if (dataTipInstance)
+						systemManager.toolTipChildren.removeChild(DisplayObject(dataTipInstance));
+					dataTipInstance=null;
+				}
+			}
+
+			protected function updateDataTip(dataTipInstance:IDataRenderer, initialPosition:Point):void
+			{
+				var tipAsDisplayObject:DisplayObject=dataTipInstance as DisplayObject;
+
+				if (tipAsDisplayObject)
+				{
+					var relX:Number=dataDisplay.getLayoutBoundsX();
+					var o:Point=new Point(relX, initialPosition.y);
+					var r:Point=dataDisplay.parent.localToGlobal(o);
+
+					// Get the screen bounds
+					var screenBounds:Rectangle=systemManager.getVisibleApplicationRect();
+					// Get the tips bounds. We only care about the dimensions.
+					var tipBounds:Rectangle=tipAsDisplayObject.getBounds(tipAsDisplayObject.parent);
+
+					// Make sure the tip doesn't exceed the bounds of the screen
+					r.x=Math.floor(Math.max(screenBounds.left, Math.min(screenBounds.right - tipBounds.width, r.x)));
+					r.y=Math.floor(Math.max(screenBounds.top, Math.min(screenBounds.bottom - tipBounds.height, r.y)));
+
+					r=tipAsDisplayObject.parent.globalToLocal(r);
+
+					var rItem:Point=localToGlobal(new Point(x, y));
+
+					tipAsDisplayObject.x=Math.max(rItem.x, r.x);
+					tipAsDisplayObject.y=r.y;
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:Group id="contentDisplay" mask="{maskDisplay.displayObject}">
+		<s:Group id="dataDisplay"
+				 top="27"
+				 bottom="10"
+				 doubleClick="doubleClickHandler(event)"
+				 mouseDown="dataDisplay_mouseDownHandler(event)"
+				 mouseOver="dataDisplay_mouseOverHandler(event)"
+				 mouseOut="dataDisplay_mouseOutHandler(event)"
+				 height="100%">
+			<s:Rect width="{dataDisplay.width}"
+					height="13">
+				<s:fill>
+					<s:LinearGradient rotation="90" y="2" scaleX="16">
+						
+						<s:GradientEntry color="{data.color}"/>
+						<s:GradientEntry color="{0xFFFFFF}"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+		</s:Group>
+		<s:Label id="labelDisplay"
+				 text="{data.label}"
+				 color="#FFFFFF"
+				 visible="{dataDisplay.visible}"
+				 width="100%"
+				 x="{dataDisplay.x}"
+				 top="10"
+				 maxDisplayedLines="1"/>
+	</s:Group>
+</local:TaskItemRenderer>

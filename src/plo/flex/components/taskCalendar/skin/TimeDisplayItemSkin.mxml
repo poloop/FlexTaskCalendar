@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			 xmlns:s="library://ns.adobe.com/flex/spark" 
+			 xmlns:mx="library://ns.adobe.com/flex/halo"
+			 width="100%"
+			 >
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("plo.flex.components.taskCalendar.TimeDisplayItem")]
+		]]>
+	</fx:Metadata>
+	<fx:Script>
+		
+		
+		override protected function initializationComplete() : void
+		{
+			super.initializationComplete();
+			
+		}
+		
+		/**
+		 *  @private
+		 */
+		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+		{
+			
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
+		}
+		
+		/**
+		 *  @private
+		 */
+		override public function styleChanged(styleProp:String):void
+		{
+			var allStyles:Boolean = !styleProp || styleProp == "styleName";
+			
+			super.styleChanged(styleProp);
+			
+		}
+	</fx:Script>
+	<s:Label id="label" text="{hostComponent.text}" left="3" top="2"/>
+</s:SparkSkin>

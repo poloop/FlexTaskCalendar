@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+			 xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:mx="library://ns.adobe.com/flex/halo"
+			 xmlns:taskCalendar="plo.flex.components.taskCalendar.*"
+			 xmlns:ns="library://ns.adobe.com/flex/mx"
+			 xmlns:slider="plo.flex.components.slider.*"
+			 >
+	<fx:Metadata>
+		<![CDATA[ 
+		[HostComponent("plo.flex.components.taskCalendar.TaskCalendar")]
+		]]>
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import flash.events.NativeDragEvent;
+			
+			import mx.core.ScrollPolicy;
+			import mx.events.FlexEvent;
+			import mx.graphics.SolidColorStroke;
+			
+			import plo.flex.components.taskCalendar.TaskCalendar;
+			
+			import spark.events.RendererExistenceEvent;
+		
+			override protected function initializationComplete():void
+			{
+				super.initializationComplete();
+				dataDisplay.scroller.setStyle("horizontalScrollPolicy", ScrollPolicy.OFF);
+				
+			}
+	
+			/**
+			 *  @private
+			 */
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				
+	
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				
+				backgroundTimeDisplay.width = (hostComponent.width - 1) - dataDisplay.scroller.verticalScrollBar.measuredWidth;
+				background.bottom = datesSlider.measuredHeight;
+			}
+	
+			/**
+			 *  @private
+			 */
+			override public function styleChanged(styleProp:String):void
+			{
+				var allStyles:Boolean=!styleProp || styleProp == "styleName";
+	
+				super.styleChanged(styleProp);
+	
+			}
+
+
+
+			protected function dataDisplay_creationCompleteHandler(event:FlexEvent):void
+			{
+				hostComponent.updateTimeDisplay();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fx:Component id="timeDisplayItem">
+			<taskCalendar:TimeDisplayItem skinClass="plo.flex.components.taskCalendar.skin.TimeDisplayItemSkin"/>
+		</fx:Component>
+	</fx:Declarations>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="disabled"/>
+	</s:states>
+
+	<!-- fill -->
+	<s:Rect id="background"
+			alpha=".2"
+			left="0"
+			right="15"
+			top="1"
+			bottom="50"
+			>
+		<s:fill>
+			<s:SolidColor id="bgFill"
+						  color="0x000000"/>
+		</s:fill>
+	</s:Rect>
+	<s:Rect id="backgroundTimeDisplay"
+			fill="{new SolidColor(0x04badf, .2)}"
+			width="{dataDisplay.width - 15}"
+			height="56"/>
+	<s:VGroup gap="0"
+			  width="{hostComponent.width}"
+			  height="{hostComponent.height}">
+		<s:VGroup id="timeDisplay"
+				  gap="0"
+				  width="{dataDisplay.width - 15}"
+				  height="56"
+				  mask="{maskDisplay.displayObject}">
+			<s:Group id="topTimeDisplay"
+					 width="100%"
+					 height="28"
+					 />
+			<s:Line stroke="{new SolidColorStroke(0x000000, 1, 1, true)}" width="100%"/>
+			<s:Group id="bottomTimeDisplay"
+					 width="100%"
+					 height="28"
+					 />
+		</s:VGroup>
+		<s:Group height="100%">
+			<s:Group id="graphicsDisplay"
+					 width="{dataDisplay.width}"
+					 height="{dataDisplay.height}"
+					 />
+			<s:Group id="vDropIndicatorDisplay"
+					 width="{dataDisplay.width}"
+					 height="100%"
+					 />
+			<s:List id="dataDisplay"
+					contentBackgroundAlpha="0"
+					doubleClickEnabled="true"
+					borderVisible="false"
+					focusAlpha="0"
+					itemRenderer="plo.flex.components.taskCalendar.skin.TaskDisplayItemRenderer"
+					dataProvider="@{hostComponent.taskCollection}"
+					width="{hostComponent.width}"
+					creationComplete="dataDisplay_creationCompleteHandler(event)"
+					height="100%">
+			</s:List>
+		</s:Group>
+		<ns:Spacer height="20"/>
+		<slider:MultiDataHSlider id="datesSlider"
+								 width="{dataDisplay.width - 15}"
+								 bottom="0"
+								 interDataThumbEnabled="true"
+								 skinClass="plo.flex.components.slider.skin.MultiDataHSliderSkin"/>
+	</s:VGroup>
+	<s:Rect id="maskDisplay"
+			left="0"
+			right="15"
+			top="0"
+			bottom="0"
+			fill="{new SolidColor(0x0000FF)}"/>
+
+</s:SparkSkin>

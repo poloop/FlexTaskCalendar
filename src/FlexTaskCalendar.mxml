@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/halo"
+					   xmlns:ns="library://ns.adobe.com/flex/mx"
+					   xmlns:taskCalendar="plo.flex.components.taskCalendar.*"
+					   width="1200" height="600" creationComplete="creationCompleteHandler(event)"
+					   showStatusBar="false">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.printing.PrintJob;
+			import flash.printing.PrintJobOrientation;
+			import flash.system.Capabilities;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.IVisualElement;
+			import mx.core.ScrollPolicy;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.CollectionEvent;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.events.PropertyChangeEvent;
+			import mx.events.ResizeEvent;
+			import mx.printing.PrintDataGrid;
+			
+			import nl.demonsters.debugger.MonsterDebugger;
+			
+			import plo.flex.components.taskCalendar.*;
+			import plo.flex.components.taskCalendar.skin.TaskCalendarPrintSkin;
+			import plo.flex.components.taskCalendar.skin.TaskCalendarSkin;
+			
+			import spark.events.RendererExistenceEvent;
+			import spark.skins.spark.ListSkin;
+
+			private var _debug:MonsterDebugger=new MonsterDebugger(this);
+
+
+
+			[Bindable]
+			private var taskCollection:ArrayCollection=new ArrayCollection();
+
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				trace("AIR version : " + nativeApplication.runtimeVersion);
+				trace("FlasPlayer : " + Capabilities.version);
+				for (var i:uint=0; i < 20; i++)
+				{
+					var task:BrandTaskObject=new BrandTaskObject();
+					task.label="TASK " + i.toString();
+					task.brand="BRAND " + i.toString();
+					taskCollection.addItem(task);
+				}
+			}
+
+			protected function taskCalendar_dateChangeHandler(event:Event):void
+			{
+
+			}
+
+
+			protected function date_changeHandler(event:CalendarLayoutChangeEvent):void
+			{
+				switch (event.currentTarget)
+				{
+					case dateInChooser:
+						taskCalendar.dateIn=event.newDate;
+						break;
+					case dateOutChooser:
+						taskCalendar.dateOut=event.newDate;
+						break;
+				}
+			}
+
+			protected function taskCalendar_selectTaskHandler(event:Event):void
+			{
+				var task:TaskObject=(event.currentTarget as TaskCalendar).selectedTask;
+				output.text=task.label;
+				scrollTaskCalendarChangeHandler(null);
+			}
+
+
+			protected function deleteTaskButton_clickHandler(event:MouseEvent):void
+			{
+				if (taskCalendar.selectedTask != null)
+					taskCalendar.removeTask(taskCalendar.selectedTask);
+			}
+
+
+			protected function printButton_clickHandler(event:MouseEvent):void
+			{
+				doPrint();
+				PrintDataGrid
+			}
+
+			protected var printJob:PrintJob=new PrintJob();
+
+			private function doPrint():void
+			{
+				if (printJob.start())
+				{
+					printJob.orientation=PrintJobOrientation.LANDSCAPE;
+					var printCalendar:PrintTaskCalendar=new PrintTaskCalendar(printJob.pageWidth, printJob.pageHeight, taskCalendar);
+					printCalendar.setStyle("skinClass", TaskCalendarPrintSkin);
+					printCalendar.addEventListener(PrintTaskCalendar.PAGE_READY, pending_printHandler);
+					printCalendar.addEventListener(FlexEvent.CREATION_COMPLETE, printCalendar_creationCompleteHandler);
+					addElement(printCalendar);
+				}
+			}
+
+			private function printCalendar_creationCompleteHandler(event:FlexEvent):void
+			{
+				(event.currentTarget as PrintTaskCalendar).checkMultiPage();
+				if (!(event.currentTarget as PrintTaskCalendar).isMultiPage)
+				{
+					printJob.addPage(event.currentTarget as Sprite, null, new PrintJobOptions());
+					printJob.send();
+					removeElement(event.currentTarget as IVisualElement);
+				}
+			}
+
+			private function pending_printHandler(event:Event):void
+			{
+				printJob.addPage(event.currentTarget as Sprite, null, new PrintJobOptions());
+				if (!(event.currentTarget as PrintTaskCalendar).getNextPages())
+				{
+					printJob.send();
+					removeElement(event.currentTarget as IVisualElement);
+				}
+
+			}
+
+			protected function taskCalendar_creationCompleteHandler(event:FlexEvent):void
+			{
+				brandList.scroller.setStyle("horizontalScrollPolicy", ScrollPolicy.OFF);
+				brandList.scroller.setStyle("verticalScrollPolicy", ScrollPolicy.OFF);
+				brandList.height=taskCalendar.dataDisplay.height;
+				taskCalendar.dataDisplay.scroller.verticalScrollBar.addEventListener(Event.CHANGE, scrollTaskCalendarChangeHandler);
+				taskCalendar.dataDisplay.addEventListener(MouseEvent.MOUSE_WHEEL, scrollTaskCalendarChangeHandler);
+				taskCalendar.dataDisplay.addEventListener(DragEvent.DRAG_OVER, scrollTaskCalendarChangeHandler);
+				brandList.addEventListener(MouseEvent.MOUSE_WHEEL, scrollBrandListChangeHandler);
+				brandList.addEventListener(RendererExistenceEvent.RENDERER_ADD, scrollTaskCalendarChangeHandler);
+				brandList.addEventListener(FlexEvent.UPDATE_COMPLETE, scrollTaskCalendarChangeHandler);
+				brandList.dataProvider.addEventListener(CollectionEvent.COLLECTION_CHANGE, scrollBrandListChangeHandler);
+			}
+
+			private function scrollTaskCalendarChangeHandler(event : Event) : void
+			{
+				brandList.layout.verticalScrollPosition = taskCalendar.dataDisplay.layout.verticalScrollPosition;
+			}
+			
+			private function scrollBrandListChangeHandler(event : Event) : void
+			{
+				taskCalendar.dataDisplay.layout.verticalScrollPosition = brandList.layout.verticalScrollPosition;
+			}
+
+			protected function taskCalendar_doubleClickItemHandler(event:Event):void
+			{
+				trace("hop");
+				trace(event.target);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	<s:VGroup width="200"
+			  height="600">
+		<ns:DateField id="dateInChooser"
+					  disabledRanges="{[{rangeStart : taskCalendar.dateOut}]}"
+					  formatString="DD/MM/YY"
+					  text="dateIn"
+					  change="date_changeHandler(event)"/>
+		<ns:DateField id="dateOutChooser"
+					  disabledRanges="{[{rangeEnd : taskCalendar.dateIn}]}"
+					  formatString="DD/MM/YY"
+					  text="dateOut"
+					  change="date_changeHandler(event)"/>
+		<s:List id="taskList"
+				width="200"
+				height="100%"
+				labelField="label"
+				dragEnabled="true"
+				dataProvider="{taskCollection}"/>
+		<s:Button id="printButton"
+				  label="PRINT"
+				  click="printButton_clickHandler(event)"/>
+	</s:VGroup>
+	<s:VGroup width="1000"
+			  height="100%">
+		<s:HGroup width="100%"
+				  height="100%">
+			<s:VGroup width="200"
+					  height="466"
+					  gap="0">
+				<ns:Spacer height="56"/>
+				<s:List id="brandList"
+						width="200"
+						height="100%"
+						labelField="brand"
+						itemRenderer="BrandListItemRenderer"
+						dataProvider="{taskCalendar.taskCollection}"
+						/>
+			</s:VGroup>
+			<taskCalendar:TaskCalendar id="taskCalendar"
+									   width="758"
+									   height="466"
+									   dateIn="{new Date(2010, 1, 1)}"
+									   dateOut="{new Date(2011, 2, 31)}"
+									   skinClass="plo.flex.components.taskCalendar.skin.TaskCalendarSkin"
+									   horizontalScrollPolicy="off"
+									   verticalScrollPolicy="on"
+									   dragEnabled="true"
+									   dragMoveEnabled="true"
+									   dropEnabled="true"
+									   defaultTaskDuration="7"
+									   dateChange="taskCalendar_dateChangeHandler(event)"
+									   selectTask="taskCalendar_selectTaskHandler(event)"
+									   doubleClickItem="taskCalendar_doubleClickItemHandler(event)"
+									   creationComplete="taskCalendar_creationCompleteHandler(event)"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Button id="deleteTaskButton"
+					  label="DELETE"
+					  click="deleteTaskButton_clickHandler(event)"/>
+			<s:Label id="output"
+					 width="100%"
+					 text="SELECT"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:WindowedApplication>

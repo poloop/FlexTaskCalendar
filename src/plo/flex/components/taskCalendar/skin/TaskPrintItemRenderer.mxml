@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<local:TaskItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+						xmlns:s="library://ns.adobe.com/flex/spark"
+						xmlns:mx="library://ns.adobe.com/flex/halo"
+						xmlns:local="plo.flex.components.taskCalendar.*"
+						creationComplete="creationCompleteHandler(event)"
+						minWidth="0"
+						minHeight="0">
+	<!-- states -->
+	<fx:Metadata>
+		[Event(name="createItem", type="flash.event.Event")]
+		[Event(name="moveTask", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+		[Event(name="scaleLeft", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+		[Event(name="scaleRight", type="plo.flex.components.taskCalendar.events.TaskEvent")]
+	</fx:Metadata>
+	<fx:Declarations>
+		<s:SolidColor id="normalColor"
+					  color="#000000"/>
+		<s:SolidColor id="hoveredColor"
+					  color="#FF0000"/>
+	</fx:Declarations>
+	
+	<local:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+		<s:State name="normalAndShowsCaret"/>
+		<s:State name="hoveredAndShowsCaret"/>
+		<s:State name="selectedAndShowsCaret"/>
+	</local:states>
+	<fx:Script>
+		<![CDATA[
+			import flash.display.DisplayObject;
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.geom.Point;
+			
+			import mx.core.IDataRenderer;
+			import mx.core.mx_internal;
+			import mx.events.FlexEvent;
+			import mx.events.SandboxMouseEvent;
+			import mx.events.StateChangeEvent;
+			import mx.graphics.LinearGradient;
+			
+			import plo.flex.components.taskCalendar.events.TaskEvent;
+			
+			import spark.components.List;
+			
+			use namespace mx_internal;
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				dispatchEvent(new Event(CREATECOMPLETE_ITEM, true));
+			}
+
+		]]>
+	</fx:Script>
+	<s:Group id="contentDisplay">
+		<s:Group id="dataDisplay"
+				 top="27"
+				 bottom="10"
+				 height="100%">
+			<s:Rect width="{dataDisplay.width}"
+					height="13">
+				<s:fill>
+					<s:LinearGradient rotation="90" y="2" scaleX="16">
+						<s:GradientEntry color="{data.color}"/>
+						<s:GradientEntry color="{0xFFFFFF}"/>
+					</s:LinearGradient>
+				</s:fill>
+			</s:Rect>
+		</s:Group>
+		<s:Label id="labelDisplay"
+				 text="{data.label}"
+				 color.hovered="#FF0000"
+				 visible="{dataDisplay.visible}"
+				 width="100%"
+				 x="{dataDisplay.x}"
+				 top="10"
+				 maxDisplayedLines="1"/>
+	</s:Group>
+</local:TaskItemRenderer>
