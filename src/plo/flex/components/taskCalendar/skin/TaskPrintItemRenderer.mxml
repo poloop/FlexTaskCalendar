@@ -8,7 +8,7 @@
 						minHeight="0">
 	<!-- states -->
 	<fx:Metadata>
-		[Event(name="createItem", type="flash.event.Event")]
+		[Event(name="createItem", type="flash.events.Event")]
 		[Event(name="moveTask", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 		[Event(name="scaleLeft", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 		[Event(name="scaleRight", type="plo.flex.components.taskCalendar.events.TaskEvent")]
@@ -30,21 +30,10 @@
 	</local:states>
 	<fx:Script>
 		<![CDATA[
-			import flash.display.DisplayObject;
-			import flash.events.Event;
-			import flash.events.MouseEvent;
-			import flash.geom.Point;
-			
-			import mx.core.IDataRenderer;
 			import mx.core.mx_internal;
 			import mx.events.FlexEvent;
-			import mx.events.SandboxMouseEvent;
-			import mx.events.StateChangeEvent;
-			import mx.graphics.LinearGradient;
-			
-			import plo.flex.components.taskCalendar.events.TaskEvent;
-			
-			import spark.components.List;
+
+			import flash.events.Event;
 			
 			use namespace mx_internal;
 			

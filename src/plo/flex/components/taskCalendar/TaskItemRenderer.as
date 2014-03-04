@@ -1,8 +1,8 @@
 package plo.flex.components.taskCalendar
 {
 	
-	[Event(name="createItem", type="flash.event.Event")]
-	[Event(name="doubleClickItem", type="flash.event.Event")]
+	[Event(name="createItem", type="flash.events.Event")]
+	[Event(name="doubleClickItem", type="flash.events.Event")]
 	[Event(name="moveTask", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 	[Event(name="scaleLeft", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 	[Event(name="scaleRight", type="plo.flex.components.taskCalendar.events.TaskEvent")]
@@ -55,10 +55,12 @@ package plo.flex.components.taskCalendar
 				backgroundAlpha=.3;
 			graphics.clear();
 			graphics.beginFill(0x000000, backgroundAlpha);
-			graphics.drawRect(0, 0, unscaledWidth - (owner as List).scroller.verticalScrollBar.measuredWidth, unscaledHeight);
+			//graphics.drawRect(0, 0, unscaledWidth - (owner as List).scroller.verticalScrollBar.measuredWidth, unscaledHeight);
+			graphics.drawRect(0, 0, unscaledWidth - 15, unscaledHeight);
 			graphics.lineStyle(1, 0, 1, true, "normal", CapsStyle.SQUARE, JointStyle.MITER, 0);
 			graphics.moveTo(0, unscaledHeight);
-			graphics.lineTo(unscaledWidth - (owner as List).scroller.verticalScrollBar.measuredWidth , unscaledHeight);
+			//graphics.lineTo(unscaledWidth - (owner as List).scroller.verticalScrollBar.measuredWidth , unscaledHeight);
+			graphics.lineTo(unscaledWidth - 15, unscaledHeight);
 			
 			
 		}

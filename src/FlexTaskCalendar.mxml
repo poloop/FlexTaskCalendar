@@ -8,12 +8,13 @@
 					   showStatusBar="false">
 	<fx:Script>
 		<![CDATA[
-			import flash.events.Event;
-			import flash.events.MouseEvent;
-			import flash.printing.PrintJob;
-			import flash.printing.PrintJobOrientation;
-			import flash.system.Capabilities;
-			
+			import nl.demonsters.debugger.MonsterDebugger;
+
+			import plo.flex.components.taskCalendar.*;
+			import plo.flex.components.taskCalendar.skin.TaskCalendarPrintSkin;
+
+			import spark.events.RendererExistenceEvent;
+
 			import mx.collections.ArrayCollection;
 			import mx.core.IVisualElement;
 			import mx.core.ScrollPolicy;
@@ -21,18 +22,13 @@
 			import mx.events.CollectionEvent;
 			import mx.events.DragEvent;
 			import mx.events.FlexEvent;
-			import mx.events.PropertyChangeEvent;
-			import mx.events.ResizeEvent;
 			import mx.printing.PrintDataGrid;
-			
-			import nl.demonsters.debugger.MonsterDebugger;
-			
-			import plo.flex.components.taskCalendar.*;
-			import plo.flex.components.taskCalendar.skin.TaskCalendarPrintSkin;
-			import plo.flex.components.taskCalendar.skin.TaskCalendarSkin;
-			
-			import spark.events.RendererExistenceEvent;
-			import spark.skins.spark.ListSkin;
+
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.printing.PrintJob;
+			import flash.printing.PrintJobOrientation;
+			import flash.system.Capabilities;
 
 			private var _debug:MonsterDebugger=new MonsterDebugger(this);
 
@@ -91,7 +87,7 @@
 			protected function printButton_clickHandler(event:MouseEvent):void
 			{
 				doPrint();
-				PrintDataGrid
+				
 			}
 
 			protected var printJob:PrintJob=new PrintJob();

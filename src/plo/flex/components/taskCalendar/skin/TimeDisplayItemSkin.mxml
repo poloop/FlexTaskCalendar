@@ -10,7 +10,7 @@
 		]]>
 	</fx:Metadata>
 	<fx:Script>
-		
+		<![CDATA[ 
 		
 		override protected function initializationComplete() : void
 		{
@@ -37,6 +37,7 @@
 			super.styleChanged(styleProp);
 			
 		}
+		]]>
 	</fx:Script>
 	<s:Label id="label" text="{hostComponent.text}" left="3" top="2"/>
 </s:SparkSkin>

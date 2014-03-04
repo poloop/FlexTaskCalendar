@@ -9,8 +9,8 @@
 				minHeight="0" xmlns:mx1="library://ns.adobe.com/flex/mx">
 	<!-- states -->
 	<fx:Metadata>
-		[Event(name="createItem", type="flash.event.Event")]
-		[Event(name="doubleClickItem", type="flash.event.Event")]
+		[Event(name="createItem", type="flash.events.Event")]
+		[Event(name="doubleClickItem", type="flash.events.Event")]
 		[Event(name="moveTask", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 		[Event(name="scaleLeft", type="plo.flex.components.taskCalendar.events.TaskEvent")]
 		[Event(name="scaleRight", type="plo.flex.components.taskCalendar.events.TaskEvent")]
@@ -66,6 +66,7 @@
 	</local:states>
 	<fx:Script>
 		<![CDATA[
+			import mx.core.IFactory;
 			import flash.display.DisplayObject;
 			import flash.events.Event;
 			import flash.events.MouseEvent;
@@ -86,10 +87,10 @@
 
 			use namespace mx_internal;
 
-			[Embed(source="assets/cursors/transforms.png")]
+			[Embed(source="/assets/cursors/transforms.png")]
 			public var TransformsCursor:Class;
 
-			[Embed(source="assets/cursors/move.png")]
+			[Embed(source="/assets/cursors/move.png")]
 			public var MoveCursor:Class;
 
 			private var clickOffset:Point;
